@@ -51,7 +51,7 @@ jobs:
       - name: Get Updator config
         uses: actions/checkout@v3
         with:
-          repository: 'reitovo/ci'
+          repository: 'reitovo/ci-private'
           path: '${{github.workspace}}/ci'
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: 'ci'
