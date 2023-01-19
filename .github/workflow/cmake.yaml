@@ -1,0 +1,69 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    runs-on: self-hosted
+    if: ${{ !contains(github.event.head_commit.message, 'skip-ci') }}
+
+    steps:
+      - name: Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+
+      - name: Update vcpkg
+        working-directory: C:/vcpkg
+        run: git fetch reito reito && git reset --hard reito/reito
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'reitovo/blive-face-relay'
+          path: '${{github.workspace}}/relay'
+          ref: 'main'
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/relay
+        run: cmake -G Ninja -B ${{github.workspace}}/relay/out/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/relay/out/install
+
+      - name: Build
+        working-directory: ${{github.workspace}}/relay
+        run: cmake --build ${{github.workspace}}/relay/out/build --target FaceRelay -j $NUMBER_OF_PROCESSORS
+
+      - name: Install
+        working-directory: ${{github.workspace}}/relay
+        run: cmake --build ${{github.workspace}}/relay/out/build --config ${{env.BUILD_TYPE}} --target install -j $NUMBER_OF_PROCESSORS
+
+      - name: Get Updator
+        uses: actions/checkout@v3
+        with:
+          repository: 'cnSchwarzer/Updator'
+          path: '${{github.workspace}}/updator'
+
+      - name: Get Updator config
+        uses: actions/checkout@v3
+        with:
+          repository: 'reitovo/ci'
+          path: '${{github.workspace}}/ci'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: 'ci'
+
+      - name: Build Updator uploader
+        working-directory: '${{github.workspace}}/updator/Updator.Uploader'
+        run: 'dotnet build -o ${{github.workspace}}/uploader'
+
+      - name: Publish build
+        shell: pwsh
+        run: |
+          dotnet ${{github.workspace}}/uploader/Updator.Uploader.dll `
+          --config=${{github.workspace}}/ci/blive-face-relay/config.json `
+          --distribution-root=${{github.workspace}}/relay/out/install `
+          --update-log="Commit ${{github.event.head_commit.message}}"

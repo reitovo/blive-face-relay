@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "blive-face-relay",
+  "license": "GPL-2.0-only",
+  "dependencies": [
+    "libimobiledevice",
+    "ixwebsocket",
+    "ftxui",
+    "simdjson"
+  ],
+  "supports": "windows | osx | linux",
+  "vcpkg-configuration": {
+    "default-registry": {
+      "kind": "git",
+      "repository": "https://github.com/cnSchwarzer/vcpkg",
+      "baseline": "b25da4d19af6e67fc76c274707d3fe890789064c",
+      "reference": "reito"
+    }
+  }
+}
