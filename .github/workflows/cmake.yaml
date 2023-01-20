@@ -53,7 +53,7 @@ jobs:
         with:
           repository: 'reitovo/ci-private'
           path: '${{github.workspace}}/ci'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_PRIVATE_TOKEN }}
           ref: 'ci'
 
       - name: Build Updator uploader
