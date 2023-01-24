@@ -1,6 +1,22 @@
 #include <iostream>
 
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+#include <IXWebSocket.h>
+#include <libimobiledevice/libimobiledevice.h>
+#include "QApplication"
+#include "ui/mainwindow.h"
+
+int main(int argc, char *argv[]) {
+
+    QCoreApplication::setOrganizationName("Reito");
+    QCoreApplication::setOrganizationDomain("reito.fun");
+    QCoreApplication::setApplicationName("FaceRelay");
+
+    QApplication a(argc, argv);
+
+    MainWindow w;
+    w.show();
+
+    auto ret = QApplication::exec();
+
+    return ret;
 }
