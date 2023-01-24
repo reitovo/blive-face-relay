@@ -12,10 +12,7 @@
       "name": "qtbase",
       "default-features": false,
       "features": [
-        "concurrent",
-        "freetype",
         "gui",
-        "icu",
         "network",
         "openssl",
         "thread",
@@ -28,7 +25,7 @@
     "default-registry": {
       "kind": "git",
       "repository": "https://github.com/cnSchwarzer/vcpkg",
-      "baseline": "22757d0b7a216cbdebef75d9e01fc758c7b9aa93",
+      "baseline": "dbeb8c21bbfa9203d4a2d2cc954afbf0bc0b4177",
       "reference": "reito"
     }
   }
