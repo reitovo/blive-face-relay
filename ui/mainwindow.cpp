@@ -39,14 +39,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ws = std::make_unique<ix::WebSocket>();
     ws->setOnMessageCallback([=](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message) {
-            qDebug() << "received message: " << QString::fromLocal8Bit(msg->str);
+            //qDebug() << "received message: " << QString::fromLocal8Bit(msg->str);
             if (this->usbRun && conn != nullptr) {
                 uint32_t sent;
-                auto &s = msg->str;
+                auto s = msg->str;
                 usbLock.lock();
-                IDEVICE_THROWONERROR(idevice_connection_send(*conn, s.data(), s.size(), &sent))
+                char zero = 0;
+                s.append(&zero, 1);
+                idevice_connection_send(*conn, s.data(), s.size(), &sent);
                 usbLock.unlock();
-                qDebug() << "idevice sent" << sent << s.size();
+                //qDebug() << "idevice sent" << sent << s.size();
+                if (sent != s.size()) {
+                    qWarning() << "idevice sent != s.size()";
+                }
             }
         } else if (msg->type == ix::WebSocketMessageType::Open) {
             qDebug() << "Connection established";
@@ -224,20 +229,24 @@ void MainWindow::usbStart(const std::shared_ptr<IDevice> &dev) {
             uint32_t bufLen;
 
             while (this->usbRun) {
-                IDEVICE_THROWONERROR(idevice_connection_receive_timeout(*conn, buf, 4096, &bufLen, 50))
+                idevice_connection_receive_timeout(*conn, buf, 4096, &bufLen, 50);
                 if (bufLen != 0) {
-                    qDebug() << "idevice recv" << bufLen;
+                    //qDebug() << "idevice recv" << bufLen;
+                    auto start = usbBuf.size();
                     usbBuf.insert(usbBuf.end(), buf, buf + bufLen);
-                    for (auto i = 0; i < usbBuf.size();++i ){
+                    for (auto i = start; i < usbBuf.size(); ++i) {
                         if (usbBuf[i] == 0) {
-                            std::string s((const char *)usbBuf.data(), i + 1);
-                            usbBuf.erase(usbBuf.begin(), usbBuf.begin() + i);
+                            std::string s((const char *) usbBuf.data(), i);
+                            usbBuf.erase(usbBuf.begin(), usbBuf.begin() + i + 1);
                             ws->sendUtf8Text(s);
+                            i = 0;
                         }
                     }
                 }
             }
         }));
+        usbReceive->start();
+
         usbLock.unlock();
     } catch (std::exception &ex) {
         usbLock.unlock();
