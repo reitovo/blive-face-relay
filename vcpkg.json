@@ -6,7 +6,6 @@
     "ixwebsocket",
     "simdjson",
     "pkgconf",
-    "qttools",
     "qttranslations",
     {
       "name": "qtbase",
