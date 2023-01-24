@@ -11,13 +11,14 @@
 #include "libimobiledevice/lockdown.h"
 #include "QMessageBox"
 #include <QSettings>
+#include <stdexcept>
 
 #define IDEVICE_THROWONERROR(x) { \
     auto _err = x;                    \
     if (_err != 0) {  \
         qDebug() << "idevice api error" << _err << __FILE__ << __LINE__ ; \
         emit onShowError(QString(QCoreApplication::translate("MainWindow", "USB连接设备失败 %1\n请检查iOS弹幕姬是否启动").arg(_err)));    \
-        throw std::exception("idevice api error");                 \
+        throw std::logic_error("idevice api error");                 \
     }                                 \
 }
 
