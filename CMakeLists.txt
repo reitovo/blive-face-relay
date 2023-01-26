@@ -52,7 +52,7 @@ set_target_properties(FaceRelay PROPERTIES
 )
 
 # Install
-if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+if (${CMAKE_BUILD_TYPE} MATCHES "Debug" AND WIN32)
     install(FILES "C:/Windows/System32/ucrtbased.dll" DESTINATION bin)
 endif()
 install(DIRECTORY "${CMAKE_BINARY_DIR}/bin/" DESTINATION ${CMAKE_INSTALL_BINDIR} FILES_MATCHING PATTERN "*.dll")
