@@ -16,7 +16,6 @@
         "openssl",
         "thread",
         "widgets",
-        "freetype",
         "fontconfig"
       ]
     }
