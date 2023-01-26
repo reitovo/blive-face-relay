@@ -70,10 +70,11 @@ jobs:
         run: 'dotnet build -o ${{github.workspace}}/uploader'
 
       - name: Publish build
+        shell: bash
         run: |
-          dotnet ${{github.workspace}}/uploader/Updator.Uploader.dll `
-          --config=${{github.workspace}}/ci/blive-face-relay/osx.json `
-          --distribution-root=${{github.workspace}}/relay/out/install `
+          dotnet ${{github.workspace}}/uploader/Updator.Uploader.dll |
+          --config=${{github.workspace}}/ci/blive-face-relay/osx.json |
+          --distribution-root=${{github.workspace}}/relay/out/install |
           --update-log="Commit ${{github.event.head_commit.message}}"
 
   build-win:
