@@ -23,6 +23,12 @@ jobs:
       HTTPS_PROXY: 'http://127.0.0.1:7890'
 
     steps:
+      - name: Install cmake
+        uses: lukka/get-cmake@latest
+        with:
+          useCloudCache: false
+          useLocalCache: true
+
       - name: Update vcpkg
         working-directory: /Users/schwarzer/vcpkg
         run: git fetch reito reito && git reset --hard reito/reito
