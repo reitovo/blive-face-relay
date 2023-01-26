@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationDomain("reito.fun");
     QCoreApplication::setApplicationName("FaceRelay");
 
-    QFontDatabase::addApplicationFont(":/fonts/MiSans-Regular.ttf");
+    auto i = QFontDatabase::addApplicationFont(":/font/MiSans-Regular.ttf");
 
     QApplication a(argc, argv);
 

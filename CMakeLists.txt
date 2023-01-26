@@ -18,6 +18,7 @@ set(TS_FILES
 
 set(PROJECT_SOURCES
     main.cpp
+    resources.qrc
     ui/mainwindow.cpp ui/mainwindow.h ui/mainwindow.ui)
 
 qt_add_executable(FaceRelay
