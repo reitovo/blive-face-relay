@@ -15,7 +15,7 @@ env:
 
 jobs:
   build-osx:
-    runs-on: self-hosted
+    runs-on: [self-hosted, macos]
     if: ${{ !contains(github.event.head_commit.message, 'skip-ci') }}
     env:
       VCPKG_ROOT: /Users/schwarzer/vcpkg
@@ -78,7 +78,7 @@ jobs:
           --update-log="Commit ${{github.event.head_commit.message}}"
 
   build-win:
-    runs-on: self-hosted
+    runs-on: [self-hosted, windows]
     if: ${{ !contains(github.event.head_commit.message, 'skip-ci') }}
 
     steps:
