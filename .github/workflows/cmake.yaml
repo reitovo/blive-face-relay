@@ -6,10 +6,74 @@ on:
   pull_request:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   BUILD_TYPE: Debug
 
 jobs:
+  build-osx:
+    runs-on: macos-latest
+    if: ${{ !contains(github.event.head_commit.message, 'skip-ci') }}
+
+    steps:
+      - name: Install cmake
+        uses: lukka/get-cmake@latest
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'reitovo/blive-face-relay'
+          path: '${{github.workspace}}/relay'
+          ref: 'main'
+
+      - name: Install vcpkg
+        uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgGitCommitId: f1359ade30d727a9d58c28abf881e0606e1dd938
+          vcpkgGitURL: https://github.com/cnSchwarzer/vcpkg
+          vcpkgJsonGlob: ${{github.workspace}}/relay/vcpkg.json
+          runVcpkgInstall: true
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/relay
+        run: cmake -G Ninja -B ${{github.workspace}}/relay/out/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/relay/out/install
+
+      - name: Build
+        working-directory: ${{github.workspace}}/relay
+        run: cmake --build ${{github.workspace}}/relay/out/build --target FaceRelay -j $NUMBER_OF_PROCESSORS
+
+      - name: Install
+        working-directory: ${{github.workspace}}/relay
+        run: cmake --build ${{github.workspace}}/relay/out/build --config ${{env.BUILD_TYPE}} --target install -j $NUMBER_OF_PROCESSORS
+
+      - name: Get Updator
+        uses: actions/checkout@v3
+        with:
+          repository: 'cnSchwarzer/Updator'
+          path: '${{github.workspace}}/updator'
+
+      - name: Get Updator config
+        uses: actions/checkout@v3
+        with:
+          repository: 'reitovo/ci-private'
+          path: '${{github.workspace}}/ci'
+          token: ${{ secrets.CI_PRIVATE_TOKEN }}
+          ref: 'ci'
+
+      - name: Build Updator uploader
+        working-directory: '${{github.workspace}}/updator/Updator.Uploader'
+        run: 'dotnet build -o ${{github.workspace}}/uploader'
+
+      - name: Publish build
+        shell: pwsh
+        run: |
+          dotnet ${{github.workspace}}/uploader/Updator.Uploader.dll `
+          --config=${{github.workspace}}/ci/blive-face-relay/osx.json `
+          --distribution-root=${{github.workspace}}/relay/out/install `
+          --update-log="Commit ${{github.event.head_commit.message}}"
+
   build-win:
     runs-on: self-hosted
     if: ${{ !contains(github.event.head_commit.message, 'skip-ci') }}
@@ -64,6 +128,6 @@ jobs:
         shell: pwsh
         run: |
           dotnet ${{github.workspace}}/uploader/Updator.Uploader.dll `
-          --config=${{github.workspace}}/ci/blive-face-relay/config.json `
+          --config=${{github.workspace}}/ci/blive-face-relay/win.json `
           --distribution-root=${{github.workspace}}/relay/out/install `
           --update-log="Commit ${{github.event.head_commit.message}}"
