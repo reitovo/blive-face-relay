@@ -12,8 +12,6 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationDomain("reito.fun");
     QCoreApplication::setApplicationName("FaceRelay");
 
-    auto i = QFontDatabase::addApplicationFont(":/font/MiSans-Regular.ttf");
-
     QApplication a(argc, argv);
 
     MainWindow w;
