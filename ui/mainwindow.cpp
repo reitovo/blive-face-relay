@@ -30,7 +30,8 @@ static void idevice_event_cb(const idevice_event_t *event, void *user_data) {
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent), ui(new Ui::MainWindow) {
     setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
-    setAttribute(Qt::WA_DeleteOnClose);
+
+    ui->setupUi(this);
 
     idevice_event_subscribe(idevice_event_cb, this);
 
@@ -43,13 +44,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ws->setOnMessageCallback([=](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message) {
             //qDebug() << "received message: " << QString::fromLocal8Bit(msg->str);
-            if (this->usbRun && conn != nullptr) {
+            if (this->usbRun && conn != nullptr && !closing) {
                 uint32_t sent;
                 auto s = msg->str;
                 usbLock.lock();
                 char zero = 0;
                 s.append(&zero, 1);
-                idevice_connection_send(*conn, s.data(), s.size(), &sent);
+                if (conn != nullptr)
+                    idevice_connection_send(*conn, s.data(), s.size(), &sent);
                 usbLock.unlock();
                 //qDebug() << "idevice sent" << sent << s.size();
                 if (sent != s.size()) {
@@ -64,14 +66,15 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
     QSettings s;
-    auto url = s.value("wsUrl").toString();
+    auto port = s.value("port", 8001).toInt();
+    auto url = QString("ws://127.0.0.1:%1").arg(port);
     qDebug() << "restore url" << url;
+
+    ui->port->setText(QString("%1").arg(port));
 
     ws->setUrl(url.toStdString());
     ws->enableAutomaticReconnection();
     ws->start();
-
-    ui->setupUi(this);
 
     connect(ui->connectVts, &QPushButton::clicked, this, &MainWindow::connectToVts);
     connect(ui->connectUsb, &QPushButton::clicked, this, &MainWindow::connectToUsb);
@@ -83,10 +86,18 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow() {
+    closing = true;
+
+    statusRefresh.stop();
+    usbStop();
+
     ws->close();
     ws.reset();
-    usbStop();
+
     idevice_event_unsubscribe();
+    devices.clear();
+    connectedDevices.clear();
+
     delete ui;
 }
 
@@ -99,7 +110,7 @@ void MainWindow::connectToVts() {
     ws->start();
 
     QSettings s;
-    s.setValue("wsUrl", url);
+    s.setValue("port", port);
     s.sync();
 }
 
@@ -122,6 +133,9 @@ void MainWindow::refreshStatus() {
 }
 
 void MainWindow::onIDeviceEvent(const idevice_event_t *event) {
+    if (closing)
+        return;
+
     switch (event->event) {
         case IDEVICE_DEVICE_ADD: {
             qDebug() << "idevice event add" << event->udid;
@@ -234,9 +248,9 @@ void MainWindow::usbStart(const std::shared_ptr<IDevice> &dev) {
             char buf[4096];
             uint32_t bufLen;
 
-            while (this->usbRun) {
+            while (this->usbRun && !this->closing) {
                 idevice_connection_receive_timeout(*conn, buf, 4096, &bufLen, 50);
-                if (bufLen != 0 && this->usbRun) {
+                if (bufLen != 0) {
                     //qDebug() << "idevice recv" << bufLen;
                     auto start = usbBuf.size();
                     usbBuf.insert(usbBuf.end(), buf, buf + bufLen);
@@ -244,9 +258,8 @@ void MainWindow::usbStart(const std::shared_ptr<IDevice> &dev) {
                         if (usbBuf[i] == 0) {
                             std::string s((const char *) usbBuf.data(), i);
                             usbBuf.erase(usbBuf.begin(), usbBuf.begin() + i + 1);
-                            if (ws != nullptr) {
+                            if (!closing)
                                 ws->sendUtf8Text(s);
-                            }
                             i = 0;
                         }
                     }

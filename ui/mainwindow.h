@@ -55,6 +55,8 @@ private:
 
     void refreshDevices();
 
+    std::atomic_bool closing = false;
+
     QMutex usbLock;
     std::unique_ptr<idevice_t> usb;
     std::unique_ptr<idevice_connection_t> conn;

@@ -26,6 +26,9 @@ qt_add_executable(FaceRelay
     ${PROJECT_SOURCES}
 )
 
+# Tokens pass from env
+target_compile_definitions(FaceRelay PUBLIC -DBACKTRACE_SUBMIT_TOKEN="${BACKTRACE_SUBMIT_TOKEN}")
+
 set_target_properties(FaceRelay
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
@@ -46,6 +49,22 @@ target_link_libraries(FaceRelay PRIVATE simdjson::simdjson)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBIMOBILEDEVICE REQUIRED IMPORTED_TARGET libimobiledevice-1.0)
 target_link_libraries(FaceRelay PUBLIC PkgConfig::LIBIMOBILEDEVICE)
+
+find_package(crashpad CONFIG REQUIRED)
+target_link_libraries(FaceRelay PRIVATE crashpad crashpad::crashpad)
+
+# Copy CrashPad Handler
+if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    add_custom_command(TARGET FaceRelay POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/zlib1.dll"
+        $<TARGET_FILE_DIR:FaceRelay>)
+    install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/zlib1.dll" DESTINATION bin)
+endif()
+
+add_custom_command(TARGET FaceRelay POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/crashpad_handler.exe"
+    $<TARGET_FILE_DIR:FaceRelay>)
+install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/crashpad_handler.exe" DESTINATION bin)
 
 set_target_properties(FaceRelay PROPERTIES
     WIN32_EXECUTABLE TRUE

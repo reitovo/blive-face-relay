@@ -6,6 +6,7 @@
     "ixwebsocket",
     "simdjson",
     "pkgconf",
+    "crashpad",
     "qttranslations",
     {
       "name": "qtbase",
