@@ -80,6 +80,7 @@ jobs:
 
     steps:
       - name: Update vcpkg
+        shell: pwsh
         working-directory: C:/vcpkg
         run: git fetch reito reito && git reset --hard reito/reito
 
