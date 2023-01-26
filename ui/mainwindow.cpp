@@ -29,6 +29,9 @@ static void idevice_event_cb(const idevice_event_t *event, void *user_data) {
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent), ui(new Ui::MainWindow) {
+    setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
+    setAttribute(Qt::WA_DeleteOnClose);
+
     idevice_event_subscribe(idevice_event_cb, this);
 
     connect(&statusRefresh, &QTimer::timeout, this, &MainWindow::refreshStatus);
@@ -80,6 +83,9 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow() {
+    ws->close();
+    ws.reset();
+    usbStop();
     idevice_event_unsubscribe();
     delete ui;
 }
@@ -230,7 +236,7 @@ void MainWindow::usbStart(const std::shared_ptr<IDevice> &dev) {
 
             while (this->usbRun) {
                 idevice_connection_receive_timeout(*conn, buf, 4096, &bufLen, 50);
-                if (bufLen != 0) {
+                if (bufLen != 0 && this->usbRun) {
                     //qDebug() << "idevice recv" << bufLen;
                     auto start = usbBuf.size();
                     usbBuf.insert(usbBuf.end(), buf, buf + bufLen);
@@ -238,7 +244,9 @@ void MainWindow::usbStart(const std::shared_ptr<IDevice> &dev) {
                         if (usbBuf[i] == 0) {
                             std::string s((const char *) usbBuf.data(), i);
                             usbBuf.erase(usbBuf.begin(), usbBuf.begin() + i + 1);
-                            ws->sendUtf8Text(s);
+                            if (ws != nullptr) {
+                                ws->sendUtf8Text(s);
+                            }
                             i = 0;
                         }
                     }
