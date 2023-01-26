@@ -14,6 +14,8 @@ int main(int argc, char *argv[]) {
 
     QApplication a(argc, argv);
 
+    auto i = QFontDatabase::addApplicationFont(":/font/MiSans-Regular.ttf");
+
     MainWindow w;
     w.show();
 
