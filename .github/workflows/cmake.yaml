@@ -15,26 +15,26 @@ env:
 
 jobs:
   build-osx:
-    runs-on: macos-latest
+    runs-on: self-hosted
     if: ${{ !contains(github.event.head_commit.message, 'skip-ci') }}
+    env:
+      VCPKG_ROOT: /Users/schwarzer/vcpkg
+      HTTP_PROXY: 'http://127.0.0.1:7890'
+      HTTPS_PROXY: 'http://127.0.0.1:7890'
 
     steps:
       - name: Install cmake
         uses: lukka/get-cmake@latest
+
+      - name: Update vcpkg
+        working-directory: /Users/schwarzer/vcpkg
+        run: git fetch reito reito && git reset --hard reito/reito
 
       - uses: actions/checkout@v3
         with:
           repository: 'reitovo/blive-face-relay'
           path: '${{github.workspace}}/relay'
           ref: 'main'
-
-      - name: Install vcpkg
-        uses: lukka/run-vcpkg@v10
-        with:
-          vcpkgGitCommitId: f1359ade30d727a9d58c28abf881e0606e1dd938
-          vcpkgGitURL: https://github.com/cnSchwarzer/vcpkg
-          vcpkgJsonGlob: ${{github.workspace}}/relay/vcpkg.json
-          runVcpkgInstall: true
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/relay
@@ -79,11 +79,6 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'skip-ci') }}
 
     steps:
-      - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-        with:
-          arch: x64
-
       - name: Update vcpkg
         working-directory: C:/vcpkg
         run: git fetch reito reito && git reset --hard reito/reito
