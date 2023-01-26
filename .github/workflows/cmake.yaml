@@ -70,7 +70,6 @@ jobs:
         run: 'dotnet build -o ${{github.workspace}}/uploader'
 
       - name: Publish build
-        shell: pwsh
         run: |
           dotnet ${{github.workspace}}/uploader/Updator.Uploader.dll `
           --config=${{github.workspace}}/ci/blive-face-relay/osx.json `
