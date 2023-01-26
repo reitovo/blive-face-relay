@@ -8,13 +8,48 @@
 #include "QFile"
 #include "QDateTime"
 
+#if TARGET_OS_MAC
+
+#include <unistd.h>
+#include <sys/sysctl.h>
+
+int IsDebuggerPresent() {
+    int junk;
+    int mib[4];
+    kinfo_proc info{};
+    size_t size;
+
+    // Initialize the flags so that, if sysctl fails for some bizarre
+    // reason, we get a predictable result.
+    info.kp_proc.p_flag = 0;
+
+    // Initialize mib, which tells sysctl the info we want, in this case
+    // we're looking for information about a specific process ID.
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+
+    // Call sysctl.
+    size = sizeof(info);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0);
+    assert(junk == 0);
+
+    // We're being debugged if the P_TRACED flag is set.
+    auto present = ((info.kp_proc.p_flag & P_TRACED) != 0);
+    return present;
+}
+
+#endif
+
+#if TARGET_OS_WINDOWS
 #include <client/crash_report_database.h>
 #include <client/settings.h>
 #include <client/crashpad_client.h>
 
 void initializeCrashpad();
-
 void redirectDebugOutput();
+#endif
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
@@ -23,19 +58,23 @@ int main(int argc, char *argv[]) {
     if (log.exists() && log.size() > 1024 * 1024 * 32)
         log.remove();
 
+#if TARGET_OS_WINDOWS
     initializeCrashpad();
     if (!IsDebuggerPresent()) {
         qInstallMessageHandler(customMessageHandler);
         QThread::create(redirectDebugOutput)->start();
     }
+#elif TARGET_OS_MAC
+    if (!IsDebuggerPresent()) {
+        qInstallMessageHandler(customMessageHandler);
+    }
+#endif
 
     QCoreApplication::setOrganizationName("Reito");
     QCoreApplication::setOrganizationDomain("reito.fun");
     QCoreApplication::setApplicationName("FaceRelay");
 
     QApplication a(argc, argv);
-
-    auto i = QFontDatabase::addApplicationFont(":/font/MiSans-Regular.ttf");
 
     MainWindow w;
     w.show();
@@ -45,6 +84,39 @@ int main(int argc, char *argv[]) {
     return ret;
 }
 
+void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+    Q_UNUSED(context);
+
+    QString dt = QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss");
+    QString txt = QString("[%1] ").arg(dt);
+
+    switch (type) {
+        case QtInfoMsg:
+            txt += QString("{Info}     %1").arg(msg);
+            break;
+        case QtDebugMsg:
+            txt += QString("{Debug}    %1").arg(msg);
+            break;
+        case QtWarningMsg:
+            txt += QString("{Warning}  %1").arg(msg);
+            break;
+        case QtCriticalMsg:
+            txt += QString("{Critical} %1").arg(msg);
+            break;
+        case QtFatalMsg:
+            txt += QString("{Fatal}    %1").arg(msg);
+            abort();
+            break;
+    }
+
+    QFile outFile("../relay.log");
+    outFile.open(QIODevice::WriteOnly | QIODevice::Append);
+
+    QTextStream textStream(&outFile);
+    textStream << txt << "\r\n";
+}
+
+#if TARGET_OS_WINDOWS
 void initializeCrashpad() {
     using namespace crashpad;
     std::map<std::string, std::string> annotations;
@@ -94,38 +166,6 @@ void initializeCrashpad() {
         qCritical() << "CrashpadClient Start Error";
         return;
     }
-}
-
-void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
-    Q_UNUSED(context);
-
-    QString dt = QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss");
-    QString txt = QString("[%1] ").arg(dt);
-
-    switch (type) {
-        case QtInfoMsg:
-            txt += QString("{Info}     %1").arg(msg);
-            break;
-        case QtDebugMsg:
-            txt += QString("{Debug}    %1").arg(msg);
-            break;
-        case QtWarningMsg:
-            txt += QString("{Warning}  %1").arg(msg);
-            break;
-        case QtCriticalMsg:
-            txt += QString("{Critical} %1").arg(msg);
-            break;
-        case QtFatalMsg:
-            txt += QString("{Fatal}    %1").arg(msg);
-            abort();
-            break;
-    }
-
-    QFile outFile("../relay.log");
-    outFile.open(QIODevice::WriteOnly | QIODevice::Append);
-
-    QTextStream textStream(&outFile);
-    textStream << txt << "\r\n";
 }
 
 const int MAX_DebugBuffer = 4096;
@@ -186,3 +226,4 @@ void redirectDebugOutput() {
     CloseHandle(hReadyEvent);
     CloseHandle(hAckEvent);
 }
+#endif

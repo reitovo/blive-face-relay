@@ -12,29 +12,29 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools Network)
 qt_standard_project_setup()
 
 set(TS_FILES
-    lang/zh_CN.ts
-    lang/en_US.ts
-)
+        lang/zh_CN.ts
+        lang/en_US.ts
+        )
 
 set(PROJECT_SOURCES
-    main.cpp
-    ui/mainwindow.cpp ui/mainwindow.h ui/mainwindow.ui)
+        main.cpp
+        ui/mainwindow.cpp ui/mainwindow.h ui/mainwindow.ui)
 
 qt_add_executable(FaceRelay
-    icon/icon.rc
-    MANUAL_FINALIZATION
-    ${PROJECT_SOURCES}
-)
+        icon/icon.rc
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+        )
 
 # Tokens pass from env
-target_compile_definitions(FaceRelay PUBLIC -DBACKTRACE_SUBMIT_TOKEN="${BACKTRACE_SUBMIT_TOKEN}")
+target_compile_definitions(FaceRelay PUBLIC -DBACKTRACE_SUBMIT_TOKEN= "${BACKTRACE_SUBMIT_TOKEN}")
 
 set_target_properties(FaceRelay
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-)
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        )
 
 target_link_libraries(FaceRelay PRIVATE Qt6::Widgets Qt6::Network)
 
@@ -50,40 +50,42 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBIMOBILEDEVICE REQUIRED IMPORTED_TARGET libimobiledevice-1.0)
 target_link_libraries(FaceRelay PUBLIC PkgConfig::LIBIMOBILEDEVICE)
 
-find_package(crashpad CONFIG REQUIRED)
-target_link_libraries(FaceRelay PRIVATE crashpad crashpad::crashpad)
+if (WIN32)
+    find_package(crashpad CONFIG REQUIRED)
+    target_link_libraries(FaceRelay PRIVATE crashpad crashpad::crashpad)
 
-# Copy CrashPad Handler
-if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    # Copy CrashPad Handler
+    if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+        add_custom_command(TARGET FaceRelay POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/zlib1.dll"
+                $<TARGET_FILE_DIR:FaceRelay>)
+        install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/zlib1.dll" DESTINATION bin)
+    endif ()
+
     add_custom_command(TARGET FaceRelay POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/zlib1.dll"
-        $<TARGET_FILE_DIR:FaceRelay>)
-    install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/zlib1.dll" DESTINATION bin)
-endif()
-
-add_custom_command(TARGET FaceRelay POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/crashpad_handler.exe"
-    $<TARGET_FILE_DIR:FaceRelay>)
-install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/crashpad_handler.exe" DESTINATION bin)
+            "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/crashpad_handler.exe"
+            $<TARGET_FILE_DIR:FaceRelay>)
+    install(FILES "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/crashpad_handler.exe" DESTINATION bin)
+endif ()
 
 set_target_properties(FaceRelay PROPERTIES
-    WIN32_EXECUTABLE TRUE
-)
+        WIN32_EXECUTABLE TRUE
+        )
 
 # Install
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug" AND WIN32)
     install(FILES "C:/Windows/System32/ucrtbased.dll" DESTINATION bin)
-endif()
+endif ()
 install(DIRECTORY "${CMAKE_BINARY_DIR}/bin/" DESTINATION ${CMAKE_INSTALL_BINDIR} FILES_MATCHING PATTERN "*.dll")
 install(TARGETS FaceRelay
-    BUNDLE  DESTINATION .
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+        BUNDLE DESTINATION .
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        )
 
 qt_generate_deploy_app_script(
-    TARGET FaceRelay
-    FILENAME_VARIABLE DEPLOY_SCRIPT
-    NO_UNSUPPORTED_PLATFORM_ERROR
+        TARGET FaceRelay
+        FILENAME_VARIABLE DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
 )
 install(SCRIPT ${DEPLOY_SCRIPT})
 qt_finalize_executable(FaceRelay)
@@ -92,6 +94,6 @@ file(WRITE "${CMAKE_BINARY_DIR}/bin/qt.conf" "[Paths]
 Prefix = ..")
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
     file(COPY "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/Qt6/plugins/" DESTINATION "${CMAKE_BINARY_DIR}/plugins/")
-else()
+else ()
     file(COPY "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/Qt6/plugins/" DESTINATION "${CMAKE_BINARY_DIR}/plugins/")
-endif()
+endif ()
