@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "sourcesUrl": "https://dist.reito.fun/blive-face-relay/sources.json",
-  "customDownloaderUrl": "https://dist.reito.fun/downloader",
+  "sourcesUrl": "https://direct.dist.reito.fun/blive-face-relay/sources.json",
+  "customDownloaderUrl": "https://direct.dist.reito.fun/downloader",
   "sources": [
     {
       "enable": true,
-      "distributionUrl": "https://dist.reito.fun/blive-face-relay/release"
+      "distributionUrl": "https://direct.dist.reito.fun/blive-face-relay/action"
     }
   ]
 }
