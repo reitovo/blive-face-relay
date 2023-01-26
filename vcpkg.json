@@ -15,8 +15,7 @@
         "network",
         "openssl",
         "thread",
-        "widgets",
-        "fontconfig"
+        "widgets"
       ]
     }
   ],
