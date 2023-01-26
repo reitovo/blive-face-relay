@@ -4,12 +4,15 @@
 #include <libimobiledevice/libimobiledevice.h>
 #include "QApplication"
 #include "ui/mainwindow.h"
+#include "QFontDatabase"
 
 int main(int argc, char *argv[]) {
 
     QCoreApplication::setOrganizationName("Reito");
     QCoreApplication::setOrganizationDomain("reito.fun");
     QCoreApplication::setApplicationName("FaceRelay");
+
+    QFontDatabase::addApplicationFont(":/fonts/MiSans-Regular.ttf");
 
     QApplication a(argc, argv);
 

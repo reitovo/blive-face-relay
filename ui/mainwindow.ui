@@ -30,6 +30,7 @@
     </property>
     <property name="font">
      <font>
+      <family>MiSans</family>
       <pointsize>9</pointsize>
      </font>
     </property>
@@ -52,6 +53,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -76,6 +78,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -101,6 +104,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -125,6 +129,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -152,6 +157,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -180,6 +186,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -192,6 +199,7 @@
         <spacer name="horizontalSpacer">
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -219,6 +227,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -238,6 +247,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -256,6 +266,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -283,6 +294,7 @@
          </property>
          <property name="font">
           <font>
+           <family>MiSans</family>
            <pointsize>9</pointsize>
           </font>
          </property>
@@ -309,6 +321,7 @@
        </property>
        <property name="font">
         <font>
+         <family>MiSans</family>
          <pointsize>9</pointsize>
         </font>
        </property>
