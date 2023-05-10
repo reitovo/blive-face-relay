@@ -26,6 +26,7 @@
       "name": "qttools",
       "default-features": false,
       "features": [
+        "designer",
         "linguist"
       ]
     }
