@@ -21,6 +21,7 @@ jobs:
       VCPKG_ROOT: /Users/schwarzer/vcpkg
       HTTP_PROXY: 'http://127.0.0.1:7890'
       HTTPS_PROXY: 'http://127.0.0.1:7890'
+      QT_HOST_PATH: /Users/schwarzer/Libraries/qt_6_3_1
 
     steps:
       - name: Install cmake
@@ -39,18 +40,6 @@ jobs:
           path: '${{github.workspace}}/relay'
           ref: 'main'
 
-      - name: Configure CMake X86_64
-        working-directory: ${{github.workspace}}/relay
-        run: cmake -G Ninja -B ${{github.workspace}}/relay/out/build-x64 -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_HOST_TRIPLET=x64-osx -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/relay/out/install-x64
-
-      - name: Build X86_64
-        working-directory: ${{github.workspace}}/relay
-        run: cmake --build ${{github.workspace}}/relay/out/build-x64 --target FaceRelay -j $NUMBER_OF_PROCESSORS
-
-      - name: Install X86_64
-        working-directory: ${{github.workspace}}/relay
-        run: cmake --build ${{github.workspace}}/relay/out/build-x64 --config ${{env.BUILD_TYPE}} --target install -j $NUMBER_OF_PROCESSORS
-
       - name: Configure CMake ARM64
         working-directory: ${{github.workspace}}/relay
         run: cmake -G Ninja -B ${{github.workspace}}/relay/out/build-arm64 -DVCPKG_TARGET_TRIPLET=arm64-osx -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/relay/out/install-arm64
@@ -62,6 +51,18 @@ jobs:
       - name: Install ARM64
         working-directory: ${{github.workspace}}/relay
         run: cmake --build ${{github.workspace}}/relay/out/build-arm64 --config ${{env.BUILD_TYPE}} --target install -j $NUMBER_OF_PROCESSORS
+
+      - name: Configure CMake X86_64
+        working-directory: ${{github.workspace}}/relay
+        run: cmake -G Ninja -B ${{github.workspace}}/relay/out/build-x64 -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_HOST_TRIPLET=x64-osx -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/relay/out/install-x64
+
+      - name: Build X86_64
+        working-directory: ${{github.workspace}}/relay
+        run: cmake --build ${{github.workspace}}/relay/out/build-x64 --target FaceRelay -j $NUMBER_OF_PROCESSORS
+
+      - name: Install X86_64
+        working-directory: ${{github.workspace}}/relay
+        run: cmake --build ${{github.workspace}}/relay/out/build-x64 --config ${{env.BUILD_TYPE}} --target install -j $NUMBER_OF_PROCESSORS
 
       - name: Merge Binary
         shell: bash
