@@ -19,8 +19,8 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'skip-ci') && !contains(github.event.head_commit.message, 'skip-mac')}}
     env:
       VCPKG_ROOT: /Users/schwarzer/vcpkg
-      HTTP_PROXY: 'http://127.0.0.1:7890'
-      HTTPS_PROXY: 'http://127.0.0.1:7890'
+      HTTP_PROXY: 'socks5h://127.0.0.1:7890'
+      HTTPS_PROXY: 'socks5h://127.0.0.1:7890'
 
     steps:
       - name: Install cmake
