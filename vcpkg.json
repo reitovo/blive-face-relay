@@ -21,6 +21,14 @@
         "thread",
         "widgets"
       ]
+    },
+    {
+      "name": "qttools",
+      "default-features": false,
+      "features": [
+        "core",
+        "linguist"
+      ]
     }
   ],
   "supports": "windows | osx | linux",
