@@ -99,6 +99,8 @@ jobs:
   build-win:
     runs-on: [self-hosted, windows]
     if: ${{ !contains(github.event.head_commit.message, 'skip-ci') && !contains(github.event.head_commit.message, 'skip-win') }}
+    env:
+      REPO_ROOT: C:/blive-face-relay
 
     steps:
       - name: Set up Visual Studio shell
@@ -110,23 +112,21 @@ jobs:
         working-directory: C:/vcpkg
         run: git fetch reito reito && git reset --hard reito/reito
 
-      - uses: actions/checkout@v3
-        with:
-          repository: 'reitovo/blive-face-relay'
-          path: '${{github.workspace}}/relay'
-          ref: 'main'
+      - name: Update relay
+        working-directory: ${{env.REPO_ROOT}}
+        run: git fetch origin main && git reset --hard origin/main
 
       - name: Configure CMake
-        working-directory: ${{github.workspace}}/relay
-        run: cmake -G Ninja -B ${{github.workspace}}/relay/out/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/relay/out/install
+        working-directory: ${{env.REPO_ROOT}}
+        run: cmake -G Ninja -B ${{env.REPO_ROOT}}/out/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{env.REPO_ROOT}}/out/install
 
       - name: Build
-        working-directory: ${{github.workspace}}/relay
-        run: cmake --build ${{github.workspace}}/relay/out/build --target FaceRelay -j $NUMBER_OF_PROCESSORS
+        working-directory: ${{env.REPO_ROOT}}
+        run: cmake --build ${{env.REPO_ROOT}}/out/build --target FaceRelay -j $NUMBER_OF_PROCESSORS
 
       - name: Install
-        working-directory: ${{github.workspace}}/relay
-        run: cmake --build ${{github.workspace}}/relay/out/build --config ${{env.BUILD_TYPE}} --target install -j $NUMBER_OF_PROCESSORS
+        working-directory: ${{env.REPO_ROOT}}
+        run: cmake --build ${{env.REPO_ROOT}}/out/build --config ${{env.BUILD_TYPE}} --target install -j $NUMBER_OF_PROCESSORS
 
       - name: Get Updator
         uses: actions/checkout@v3
@@ -151,5 +151,5 @@ jobs:
         run: |
           dotnet ${{github.workspace}}/uploader/Updator.Uploader.dll `
           --config=${{github.workspace}}/ci/blive-face-relay/win.json `
-          --distribution-root=${{github.workspace}}/relay/out/install `
+          --distribution-root=${{env.REPO_ROOT}}/out/install `
           --update-log="Commit ${{github.event.head_commit.message}}"
