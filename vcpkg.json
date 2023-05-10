@@ -19,7 +19,8 @@
         "network",
         "openssl",
         "thread",
-        "widgets"
+        "widgets",
+        "png"
       ]
     },
     {
