@@ -53,7 +53,7 @@ jobs:
 
       - name: Configure CMake X86_64
         working-directory: ${{github.workspace}}/relay
-        run: cmake -G Ninja -B ${{github.workspace}}/relay/out/build-x64 -DVCPKG_TARGET_TRIPLET=x64-osx -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/relay/out/install-x64
+        run: cmake -G Ninja -B ${{github.workspace}}/relay/out/build-x64 -DVCPKG_TARGET_TRIPLET=x64-osx -DVCPKG_HOST_TRIPLET=x64-osx -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/relay/out/install-x64
 
       - name: Build X86_64
         working-directory: ${{github.workspace}}/relay
