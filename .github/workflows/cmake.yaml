@@ -67,8 +67,8 @@ jobs:
         run: |
           mkdir -p ${{env.REPO_ROOT}}/out/install/bin
           lipo -create -output ${{env.REPO_ROOT}}/out/install/bin/FaceRelay \
-            ${{env.REPO_ROOT}}/out/install-arm64/bin/FaceRelay \
-            ${{env.REPO_ROOT}}/out/install-x64/bin/FaceRelay
+              ${{env.REPO_ROOT}}/out/install-arm64/bin/FaceRelay \
+              ${{env.REPO_ROOT}}/out/install-x64/bin/FaceRelay
 
       - name: Get Updator
         uses: actions/checkout@v3
