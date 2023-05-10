@@ -10,10 +10,7 @@
       "name": "crashpad",
       "platform": "windows"
     },
-    {
-      "name": "qttranslations",
-      "platform": "windows"
-    },
+    "qttranslations",
     {
       "name": "qtbase",
       "default-features": false,
