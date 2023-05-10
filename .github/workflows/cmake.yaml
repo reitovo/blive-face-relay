@@ -22,8 +22,6 @@ jobs:
       REPO_ROOT: /Users/schwarzer/blive-face-relay
       HTTP_PROXY: 'socks5://127.0.0.1:10808'
       HTTPS_PROXY: 'socks5://127.0.0.1:10808'
-    vars:
-
 
     steps:
       - name: Install cmake
