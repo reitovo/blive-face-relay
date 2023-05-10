@@ -21,7 +21,6 @@ jobs:
       VCPKG_ROOT: /Users/schwarzer/vcpkg
       HTTP_PROXY: 'http://127.0.0.1:7890'
       HTTPS_PROXY: 'http://127.0.0.1:7890'
-      QT_HOST_PATH: /Users/schwarzer/Qt
 
     steps:
       - name: Install cmake
