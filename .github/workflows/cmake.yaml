@@ -66,8 +66,10 @@ jobs:
       - name: Merge Binary
         shell: bash
         run: |
-          mkdir ${{github.workspace}}/relay/out/install
-          lipo -create -output ${{github.workspace}}/relay/out/install ${{github.workspace}}/relay/out/install-arm64/FaceRelay ${{github.workspace}}/relay/out/install-x64/FaceRelay
+          mkdir -p ${{github.workspace}}/relay/out/install/bin
+          lipo -create -output ${{github.workspace}}/relay/out/install/bin/FaceRelay \
+            ${{github.workspace}}/relay/out/install-arm64/bin/FaceRelay \
+            ${{github.workspace}}/relay/out/install-x64/bin/FaceRelay
 
       - name: Get Updator
         uses: actions/checkout@v3
